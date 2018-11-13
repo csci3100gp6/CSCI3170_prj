@@ -1,11 +1,32 @@
 // class driver
+import java.sql.*;
 
 public class Driver implements User{
+    private String dbAddress;
+    private String dbUsername;
+    private String dbPassword;
+    private Connection con;
     // constructor 
     public Driver(){
-        ;
+        this.dbAddress = "jdbc:mysql://projgw.cse.cuhk.edu.hk:2633/db18";
+        this.dbUsername = "Group18";
+        this.dbPassword = "soa3170";
     }
     
+    // Connect to database
+    public void connect_to_db() {
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            this.con = DriverManager.getConnection(dbAddress, dbUsername, dbPassword);
+        } catch (ClassNotFoundException e) {
+            System.out.println("[Error]: Java MySQL DB Driver not found!!");
+            System.exit(0);
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        System.out.println("Connected successfully");
+    }
+
     // implements printStatements
     public void printStatements() {
         System.out.println("Driver, what would you like to do?");
