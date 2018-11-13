@@ -5,7 +5,7 @@ public class DriverProgram{
     // print the welcome statement and retrieve the user type
     public static void print_welcome_statement(){
         System.out.println("Welcome! Who are you?");
-        System.out.println("1. Adminstrator");
+        System.out.println("1. Administrator");
         System.out.println("2. A passenger");
         System.out.println("3. A driver");
         System.out.println("4. None of the above");
@@ -14,7 +14,7 @@ public class DriverProgram{
     public static void main(String[] args){
         Scanner input = new Scanner(System.in);        
         boolean valid_input = true;
-        int user_type = 1;
+        int user_type = -1;
         print_welcome_statement();
         
         // ask the user to input user_type: admin, passenger, or driver until valid input is located
@@ -29,6 +29,9 @@ public class DriverProgram{
                 user_type = input.nextInt();
             }
             catch (InputMismatchException e) {
+                ;
+            }
+            finally {
                 ;
             }
             
@@ -48,14 +51,12 @@ public class DriverProgram{
                 u1.connect_to_db();
                 do {
                     if (valid_input == true){
-                        u1.printStatements();
+                        u1.print_statements();
                     }
                     valid_input = true;
-                    System.out.println("a");
                     // catch exception if the input is not even an integer
                     try {
                         choice = input.nextInt();
-                        System.out.println("b");
                     } 
                     catch (InputMismatchException e) {
                         ;
@@ -65,26 +66,26 @@ public class DriverProgram{
                         // create table
                         case 1:
                             System.out.println("create");
-                            // u1.create();
+                            u1.create();
                             break;
                         // Delete table
                         case 2:
                             System.out.println("delete");
-                            // u1.delete();
+                            u1.delete();
                             break;
                         // Load data
                         case 3:
-                        System.out.println("loaded");
-                            // u1.load();
+                            System.out.println("loaded");
+                            u1.load();
                             break;
                         // Check data
                         case 4:
                             System.out.println("check");
-                            // u1.check();
+                            u1.check();
                             break;
                         // Go back
                         case 5:
-                            u1.go_back();
+                            u1.close_connection();
                             break;
                         // invalid input
                         default:
@@ -95,27 +96,29 @@ public class DriverProgram{
                     }
                 } while (choice != 5);
                 break;
-                
+
+            // This user is a passenger
             case 2:
                 Passenger u2 = new Passenger();
                 u2.connect_to_db();
                 do {
                     if (valid_input == true){
-                        u2.printStatements();
+                        u2.print_statements();
                     }
                     valid_input = true;
                     
-                    // catch exception if the input is not even an integer
+                    // catch exception for invalid input
                     try {
                         choice = input.nextInt();
                     } catch (NumberFormatException e) {
                         ;
                     }
+                    
                     switch (choice) {
                         // request a ride
                         case 1:
                             System.out.println("request a ride");
-                            // u2.request_a_ride();
+                            u2.request_a_ride();
                             break;
                         // check a trip
                         case 2:
@@ -128,6 +131,7 @@ public class DriverProgram{
                             // u2.rate_a_trip();
                             break;
                         case 4:
+                            u2.close_connection();
                             break;
                         // invalid input
                         default:
@@ -143,7 +147,7 @@ public class DriverProgram{
                 u3.connect_to_db();
                 do {
                     if (valid_input == true){
-                        u3.printStatements();
+                        u3.print_statements();
                     }
                     valid_input = true;
                 // catch exception if the input is not even an integer
@@ -170,6 +174,7 @@ public class DriverProgram{
                         // u3.check_driver_rating();
                         break;
                     case 4:
+                        u3.close_connection();
                         break;
                     // invalid input
                     default:
@@ -186,5 +191,6 @@ public class DriverProgram{
 
         // Avoid memory leak
         input.close();
+        
     }
 }

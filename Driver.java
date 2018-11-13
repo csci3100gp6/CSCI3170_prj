@@ -27,8 +27,17 @@ public class Driver implements User{
         System.out.println("Connected successfully");
     }
 
+    // Disconnect the DB
+    public void close_connection() {
+        try {
+            this.con.close();
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+    }
+
     // implements printStatements
-    public void printStatements() {
+    public void print_statements() {
         System.out.println("Driver, what would you like to do?");
         System.out.println("1. Take a request");
         System.out.println("2. Finish a trip");
@@ -52,9 +61,5 @@ public class Driver implements User{
         ;
     }
 
-    // go back
-    public void go_back(){
-        return;
-
-    }
+  
 }
