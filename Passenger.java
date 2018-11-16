@@ -53,21 +53,62 @@ public class Passenger implements User{
         Scanner input = new Scanner(System.in);
         int pid, no_of_passenger;
         int model_year=-1;
-        String model = new String();
-        model = null;
+        String model_name = new String("");
+        String sql = new String("SELECT COUNT(*) FROM vehicle V, drives DR, driver D WHERE V.id == DR.vid AND D.id == DR.did AND V.seats >= %s");
         
         System.out.println("Please enter your passenger ID.");
         pid = input.nextInt();
+
         System.out.println("Please enter the number of passengers.");
         no_of_passenger = input.nextInt();
+        sql = String.format(sql, no_of_passenger);
+
         System.out.println("Please enter the earlist model year. (Press enter to skip)");
         model_year = input.nextInt();
+
         System.out.println("Please enter the model. (Press enter to skip)");
-        model = input.nextLine();
-        if (model.isEmpty()){
-            model = null;
+        model_name = input.nextLine();
+
+        // Users enter model name
+        if (!model_name.equals("")){
+            String cond = String.format(" AND V.model LIKE '%%s%'", model_name);
+            sql += cond;
         }
 
+        // User enter model year 
+        if (model_year != -1) {
+            String cond = String.format(" AND V.model_year >= %s", model_year);
+            sql += cond;
+        }
+
+        Statement stmt = null;
+        ResultSet result = null;
+
+        try {
+            stmt = this.con.createStatement();
+            result = stmt.executeQuery(sql);
+
+            result.close();
+        } 
+        catch (SQLException e) {
+            System.out.println(e);
+        }
+        finally {
+            if (result != null) {
+                try {
+                    result.close();
+                } catch (SQLException sqlEx) {
+                }
+                result = null;
+            }
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException sqlEx) {
+                }
+                stmt = null;
+            }
+        }
     }
 
     // check a trip
