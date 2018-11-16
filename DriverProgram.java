@@ -23,7 +23,6 @@ public class DriverProgram{
                 System.out.println("[ERROR] Invalid Input.");
                 System.out.println("Please enter [1-4].");
             }
-            System.out.println("a");
             // catch exception if the input is not even an integer
             try{
                 user_type = input.nextInt();
@@ -39,7 +38,6 @@ public class DriverProgram{
             
         }
         while (!(user_type>0 && user_type<5));
-        System.out.println("b");
         // close the scanner to avoid memory leak and reset valid_input bool var
         int choice = -1;
         valid_input = true;
@@ -48,11 +46,9 @@ public class DriverProgram{
         switch(user_type){
             // administrator
             case 1: 
-                System.out.println("c");
                 Administrator u1 = new Administrator();
                 u1.connect_to_db();
                 do {
-                System.out.println("d");
                     
                     System.out.println(valid_input);
                     if (valid_input == true){

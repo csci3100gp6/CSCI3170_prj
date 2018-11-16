@@ -1,9 +1,9 @@
 // Administrator is a user
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.*;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.text.SimpleDateFormat;
 
 public class Administrator implements User{
     private String dbAddress;
@@ -20,51 +20,83 @@ public class Administrator implements User{
 
     // a method to insert a record into the database
     private void insert_into_db(String inputs, String table_name){
-        PreparedStatement p = new PreparedStatement();
+        PreparedStatement p = null;
         String[] elements = inputs.split(",");
         switch(table_name){
             case "drivers.csv":
-                p = this.con.prepareStatement("INSERT INTO driver (id, name, vehicle_id) values (?, ?, ?);");
-                p.setInt(1, Integer.parseInt(elements[0]));
-                p.setString(2, elements[1]);
-                p.setString(3, elements[2]);
+                try {
+                    p = this.con.prepareStatement("INSERT INTO driver (id, name, vehicle_id) values (?, ?, ?);");
+                    p.setInt(1, Integer.parseInt(elements[0]));
+                    p.setString(2, elements[1]);
+                    p.setString(3, elements[2]);
+                }
+                catch (SQLException e){
+                    ;
+                }
                 break;
             case "vehicles.csv":
-                System.out.println("enter vehicles case");
-                // p = con.prepareStatement("INSERT INTO driver (id, name, vehicle_id) values (?, ?, ?);");
+                try {
+                    p = this.con.prepareStatement("INSERT INTO vehicle (id, model, model_year, seats) values (?, ?, ?, ?);");
+                    p.setString(1, elements[0]);
+                    p.setString(2, elements[1]);
+                    p.setInt(3, Integer.parseInt(elements[2]));
+                    p.setInt(4, Integer.parseInt(elements[3]));
+                } catch (SQLException e) {
+                    ;
+                }
                 break;
             case "passengers.csv":
-                System.out.println("enter passengers case");                
-                // p = con.prepareStatement("INSERT INTO driver (id, name, vehicle_id) values (?, ?, ?);");
+                try {
+                    p = this.con.prepareStatement("INSERT INTO passenger (id, name) values (?, ?);");
+                    p.setInt(1, Integer.parseInt(elements[0]));
+                    p.setString(2, elements[1]);
+                } catch (SQLException e) {
+                    ;
+                }
                 break;
             case "trips.csv":
-                System.out.println("enter trip case");                
-                // p = con.prepareStatement("INSERT INTO driver (id, name, vehicle_id) values (?, ?, ?);");                
+                try {
+                    p = this.con.prepareStatement("INSERT INTO trip (id, driver_id, passenger_id, start, end, fee, rating) values (?, ?, ?, ?, ?, ?, ?);");
+                    for (int j=0;j<7;j++){
+                        System.out.print(elements[j] + ",");
+                    }
+                    System.out.println();
+                    p.setInt(1, Integer.parseInt(elements[0]));
+                    p.setInt(2, Integer.parseInt(elements[1]));
+                    p.setInt(3, Integer.parseInt(elements[2]));
+                    p.setTimestamp(4, Timestamp.valueOf(elements[3]));
+                    p.setTimestamp(5, Timestamp.valueOf(elements[4]));
+                    p.setInt(6, Integer.parseInt(elements[5]));
+                    p.setInt(7, Integer.parseInt(elements[6]));
+
+                } catch (SQLException e) {
+                    ;
+                }   
                 break;
             default:
                 System.out.println("Sth unexpected happens!");
                 break;
         }
-        String sql = "";
+        // String sql = "";
         try {
-            p.executeUpdate(sql);
+            p.executeUpdate();
             // System
         } catch (SQLException e) {
             System.out.println(e);
         } finally {
-            if (result != null) {
+            if (p != null) {
                 try {
-                    result.close();
+                    p.close();
                 } catch (SQLException sqlEx) {
                 }
-                result = null;
+                p = null;
             }
-            if (stmt != null) {
+            if (p != null) {
                 try {
-                    stmt.close();
+                    p.close();
                 } catch (SQLException sqlEx) {
                 }
-                stmt = null;
+                p = null;
             }
         }
     }
@@ -187,6 +219,8 @@ public class Administrator implements User{
         ResultSet result = null;
         String path = new String();
         String filelocation = new String();
+
+        String temp = new String();
         List <String[]> templist =new ArrayList<String[]>();
 
         // ask user for the input path
@@ -199,9 +233,11 @@ public class Administrator implements User{
             try{
                 System.out.println(filelocation);
                 Scanner inputfile = new Scanner(new File(filelocation));
-                inputfile.useDelimiter(",");
+                // inputfile.useDelimiter(",");
                 while (inputfile.hasNextLine()){
-                    System.out.println(inputfile.nextLine());
+                    temp = inputfile.nextLine();
+                    System.out.println(temp);
+                    insert_into_db(temp, file[i]);
                 }
             }
             catch (FileNotFoundException e){
@@ -212,31 +248,6 @@ public class Administrator implements User{
         }
 
 
-
-        // String sql = "INSERT INTO driver (id, name, vehicle_id) values (21, 'driver_a', 23);";
-        // String sql2 = "INSERT INTO vehicle (id, model, model_year, seats) values (27, 'tesla', '2018', 273);";
-  
-        // try {
-        //     this.con.createStatement().execute(sql);
-        //     this.con.createStatement().execute(sql2);
-        // } catch (SQLException e) {
-        //     System.out.println(e);
-        // } finally {
-        //     if (result != null) {
-        //         try {
-        //             result.close();
-        //         } catch (SQLException sqlEx) {
-        //         }
-        //         result = null;
-        //     }
-        //     if (stmt != null) {
-        //         try {
-        //             stmt.close();
-        //         } catch (SQLException sqlEx) {
-        //         }
-        //         stmt = null;
-        //     }
-        // }
     }
 
     // check
