@@ -1,5 +1,9 @@
 // Administrator is a user
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
 
 public class Administrator implements User{
     private String dbAddress;
@@ -12,6 +16,57 @@ public class Administrator implements User{
         this.dbAddress = "jdbc:mysql://projgw.cse.cuhk.edu.hk:2633/db18";
         this.dbUsername = "Group18";
         this.dbPassword = "soa3170";
+    }
+
+    // a method to insert a record into the database
+    private void insert_into_db(String inputs, String table_name){
+        PreparedStatement p = new PreparedStatement();
+        String[] elements = inputs.split(",");
+        switch(table_name){
+            case "drivers.csv":
+                p = this.con.prepareStatement("INSERT INTO driver (id, name, vehicle_id) values (?, ?, ?);");
+                p.setInt(1, Integer.parseInt(elements[0]));
+                p.setString(2, elements[1]);
+                p.setString(3, elements[2]);
+                break;
+            case "vehicles.csv":
+                System.out.println("enter vehicles case");
+                // p = con.prepareStatement("INSERT INTO driver (id, name, vehicle_id) values (?, ?, ?);");
+                break;
+            case "passengers.csv":
+                System.out.println("enter passengers case");                
+                // p = con.prepareStatement("INSERT INTO driver (id, name, vehicle_id) values (?, ?, ?);");
+                break;
+            case "trips.csv":
+                System.out.println("enter trip case");                
+                // p = con.prepareStatement("INSERT INTO driver (id, name, vehicle_id) values (?, ?, ?);");                
+                break;
+            default:
+                System.out.println("Sth unexpected happens!");
+                break;
+        }
+        String sql = "";
+        try {
+            p.executeUpdate(sql);
+            // System
+        } catch (SQLException e) {
+            System.out.println(e);
+        } finally {
+            if (result != null) {
+                try {
+                    result.close();
+                } catch (SQLException sqlEx) {
+                }
+                result = null;
+            }
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException sqlEx) {
+                }
+                stmt = null;
+            }
+        }
     }
 
     // Connect to database
@@ -127,35 +182,61 @@ public class Administrator implements User{
 
     // load
     public void load(){
+        Scanner input = new Scanner(System.in);
         Statement stmt = null;
         ResultSet result = null;
-        String sql = "INSERT INTO driver (id, name, vehicle_id) values (21, 'driver_a', 23);";
-        String sql2 = "INSERT INTO vehicle (id, model, model_year, seats) values (27, 'tesla', '2018', 273);";
-        // + "SELECT COUNT(*) FROM passenger;"
-        // + "SELECT COUNT(*) FROM request;"
-        // + "SELECT COUNT(*) FROM trip;";
+        String path = new String();
+        String filelocation = new String();
+        List <String[]> templist =new ArrayList<String[]>();
 
-        try {
-            this.con.createStatement().execute(sql);
-            this.con.createStatement().execute(sql2);
-        } catch (SQLException e) {
-            System.out.println(e);
-        } finally {
-            if (result != null) {
-                try {
-                    result.close();
-                } catch (SQLException sqlEx) {
+        // ask user for the input path
+        System.out.println("Please enter the folder path.");
+        path = input.nextLine();
+        path = "./" + path;
+        String[] file = {"drivers.csv","vehicles.csv","passengers.csv","trips.csv"};
+        for (int i = 0; i<4;i++){
+            filelocation = path + "/" + file[i];
+            try{
+                System.out.println(filelocation);
+                Scanner inputfile = new Scanner(new File(filelocation));
+                inputfile.useDelimiter(",");
+                while (inputfile.hasNextLine()){
+                    System.out.println(inputfile.nextLine());
                 }
-                result = null;
             }
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException sqlEx) {
-                }
-                stmt = null;
+            catch (FileNotFoundException e){
+                System.out.println("file not found");
             }
+
+
         }
+
+
+
+        // String sql = "INSERT INTO driver (id, name, vehicle_id) values (21, 'driver_a', 23);";
+        // String sql2 = "INSERT INTO vehicle (id, model, model_year, seats) values (27, 'tesla', '2018', 273);";
+  
+        // try {
+        //     this.con.createStatement().execute(sql);
+        //     this.con.createStatement().execute(sql2);
+        // } catch (SQLException e) {
+        //     System.out.println(e);
+        // } finally {
+        //     if (result != null) {
+        //         try {
+        //             result.close();
+        //         } catch (SQLException sqlEx) {
+        //         }
+        //         result = null;
+        //     }
+        //     if (stmt != null) {
+        //         try {
+        //             stmt.close();
+        //         } catch (SQLException sqlEx) {
+        //         }
+        //         stmt = null;
+        //     }
+        // }
     }
 
     // check

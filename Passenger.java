@@ -59,9 +59,9 @@ public class Passenger implements User{
         System.out.println("Please enter your passenger ID.");
         pid = input.nextInt();
         System.out.println("Please enter the number of passengers.");
-        no_of_passenger = this.input.nextInt();
+        no_of_passenger = input.nextInt();
         System.out.println("Please enter the earlist model year. (Press enter to skip)");
-        model_year = this.input.nextInt();
+        model_year = input.nextInt();
         System.out.println("Please enter the model. (Press enter to skip)");
         model = input.nextLine();
         if (model.isEmpty()){
