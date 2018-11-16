@@ -54,14 +54,14 @@ public class Passenger implements User{
         int pid, no_of_passenger;
         int model_year=-1;
         String model_name = new String("");
-        String sql = new String("SELECT COUNT(*) FROM vehicle V, drives DR, driver D WHERE V.id == DR.vid AND D.id == DR.did AND V.seats >= %s");
+        String sql = new String("SELECT COUNT(*) FROM vehicle V, driver D WHERE V.id == D.vehicle_id AND V.seats >= %s");
         
         System.out.println("Please enter your passenger ID.");
         pid = input.nextInt();
 
         System.out.println("Please enter the number of passengers.");
         no_of_passenger = input.nextInt();
-        sql = String.format(sql, no_of_passenger);
+        sql = String.format(sql, Integer.toString(no_of_passenger));
 
         System.out.println("Please enter the earlist model year. (Press enter to skip)");
         model_year = input.nextInt();
@@ -77,7 +77,7 @@ public class Passenger implements User{
 
         // User enter model year 
         if (model_year != -1) {
-            String cond = String.format(" AND V.model_year >= %s", model_year);
+            String cond = String.format(" AND V.model_year >= %s", Integer.toString(model_year));
             sql += cond;
         }
 
@@ -87,6 +87,15 @@ public class Passenger implements User{
         try {
             stmt = this.con.createStatement();
             result = stmt.executeQuery(sql);
+            int driver_num = -1;
+
+            if (!result.isBeforeFirst()){
+                System.out.println("No record found. Please adjust the criteria.");
+            }
+            else {
+                driver_num = result.getInt(1);
+                System.out.println("Your request is placed. " + Integer.toString(driver_num) + " drivers are able to take the request.");
+            }
 
             result.close();
         } 
