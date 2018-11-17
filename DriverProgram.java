@@ -124,12 +124,12 @@ public class DriverProgram{
                         // check a trip
                         case 2:
                             System.out.println("check a trip");
-                            // u2.check_a_trip();
+                            u2.check_a_trip();
                             break;
                         // rate a trip
                         case 3:
                             System.out.println("rate a trip");
-                            // u2.rate_a_trip();
+                            u2.rate_a_trip();
                             break;
                         case 4:
                             u2.close_connection();

@@ -148,7 +148,7 @@ public class Passenger implements User{
                      "ORDER BY T.start DESC;";
 
         try {
-            pstmt = con.prepareStatement(sql);
+            pstmt = this.con.prepareStatement(sql);
             pstmt.setInt(1, Integer.parseInt(pid));
             pstmt.setTimestamp(2, Timestamp.valueOf(start_date));
             pstmt.setTimestamp(3, Timestamp.valueOf(end_date));
@@ -174,22 +174,117 @@ public class Passenger implements User{
                 try {
                     result.close();
                 } catch (SQLException sqlEx) {
-                }
-                result = null;
+            }
+            result = null;
             }
             if (pstmt != null) {
                 try {
                     pstmt.close();
                 } catch (SQLException sqlEx) {
-                }
-                pstmt = null;
+            }
+            pstmt = null;
             }
         }
     }
 
     // rate a trip
     public void rate_a_trip(){
-        ;
+        Scanner input = new Scanner(System.in);
+        String pid = new String();
+        String tid = new String();
+        String rating = new String();
+
+        System.out.println("Please enter your ID.");
+        pid = input.nextLine();
+
+        System.out.println("Please enter the trip ID.");
+        tid = input.nextLine();
+
+        System.out.println("Please enter the rating.");
+        rating = input.nextLine();
+
+        String sql_retrieve = "SELECT T.id, D.name, V.id, V.model, T.start, T.end, T.fee, T.rating " +
+                              "FROM trip T, vehicle V, driver D WHERE T.driver_id = D.id AND D.vehicle_id = V.id " +
+                              "AND T.passenger_id = ? AND T.id = ?;";
+
+        String sql_update = "UPDATE trip T " + 
+                            "SET T.rating = ? " +
+                            "WHERE T.passenger_id = ? AND T.id = ?;";
+
+        PreparedStatement pstmt_retrieve = null;
+        PreparedStatement pstmt_update = null;
+        int updateCount = -1;
+        ResultSet result = null;
+
+        try {
+            pstmt_update = this.con.prepareStatement(sql_update);
+            pstmt_update.setInt(1, Integer.parseInt(rating));
+            pstmt_update.setInt(2, Integer.parseInt(pid));
+            pstmt_update.setInt(3, Integer.parseInt(tid));
+            updateCount = pstmt_update.executeUpdate();
+        }
+        catch(SQLException e){
+            System.out.println(e);
+        }
+        finally {
+            if (pstmt_update != null) {
+                try {
+                    pstmt_update.close();
+                }
+                catch (SQLException e) {
+                    System.out.println(e);
+                }
+            }
+
+            pstmt_update = null;
+        }
+
+        try {
+            pstmt_retrieve = this.con.prepareStatement(sql_retrieve);
+            pstmt_retrieve.setInt(1, Integer.parseInt(pid));
+            pstmt_retrieve.setInt(2, Integer.parseInt(tid));
+            result = pstmt_retrieve.executeQuery();
+
+            ResultSetMetaData rsmd = result.getMetaData();
+            System.out.println("Trip ID, Driver Name, Vehicle ID, Vehicle model, Start, End, Fee, Rating");
+
+            while (result.next()){
+                for (int j=1; j<=rsmd.getColumnCount();j++){
+                    if (j>1){
+                        System.out.print(", ");
+                    }
+                    System.out.print(result.getString(j));
+                }
+                System.out.println();
+            }
+            result.close();
+
+        }
+        catch(SQLException e){
+            System.out.println(e);
+        }
+        finally {
+            if (result != null) {
+                try {
+                    result.close();
+                }
+                catch (SQLException e) {
+                    System.out.println(e);
+                }
+            }
+            result = null;
+
+            if (pstmt_retrieve != null) {
+                try {
+                    pstmt_retrieve.close();
+                }
+                catch (SQLException e) {
+                    System.out.println(e);
+                }
+            }
+
+            pstmt_retrieve = null;
+        }
     }
 
 }
