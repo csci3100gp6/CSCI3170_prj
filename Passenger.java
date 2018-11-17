@@ -202,6 +202,11 @@ public class Passenger implements User{
 
         System.out.println("Please enter the rating.");
         rating = input.nextLine();
+        
+        if (Integer.parseInt(rating) > 5 || Integer.parseInt(rating) < 1) {
+            System.out.println("The value of rating should be between 1 and 5.");
+            return;
+        }
 
         String sql_retrieve = "SELECT T.id, D.name, V.id, V.model, T.start, T.end, T.fee, T.rating " +
                               "FROM trip T, vehicle V, driver D WHERE T.driver_id = D.id AND D.vehicle_id = V.id " +
