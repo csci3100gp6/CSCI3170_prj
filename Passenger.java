@@ -51,49 +51,51 @@ public class Passenger implements User{
     // request a ride
     public void request_a_ride(){
         Scanner input = new Scanner(System.in);
-        int pid, no_of_passenger;
-        int model_year=-1;
-        String model_name = new String("");
-        String sql = new String("SELECT COUNT(*) FROM vehicle V, driver D WHERE V.id == D.vehicle_id AND V.seats >= %s");
+        int pid;
+        String no_of_passenger = new String();
+        String model_year = new String();
+        String model_name = new String();
+        String sql = new String("SELECT COUNT(*) FROM vehicle V, driver D WHERE V.id = D.vehicle_id AND V.seats >= %s");
         
         System.out.println("Please enter your passenger ID.");
-        pid = input.nextInt();
+        pid = Integer.parseInt(input.nextLine());
 
         System.out.println("Please enter the number of passengers.");
-        no_of_passenger = input.nextInt();
-        sql = String.format(sql, Integer.toString(no_of_passenger));
+        no_of_passenger = input.nextLine();
+        sql = String.format(sql, no_of_passenger);
 
         System.out.println("Please enter the earlist model year. (Press enter to skip)");
-        model_year = input.nextInt();
+        model_year = input.nextLine();
 
         System.out.println("Please enter the model. (Press enter to skip)");
         model_name = input.nextLine();
 
         // Users enter model name
         if (!model_name.equals("")){
-            String cond = String.format(" AND V.model LIKE '%%s%'", model_name);
+            String cond = " AND V.model LIKE '%" + model_name + "%'";
             sql += cond;
         }
 
         // User enter model year 
-        if (model_year != -1) {
-            String cond = String.format(" AND V.model_year >= %s", Integer.toString(model_year));
+        if (!model_year.equals("")) {
+            String cond = String.format(" AND V.model_year >= %s", model_year);
             sql += cond;
         }
 
         Statement stmt = null;
         ResultSet result = null;
+        sql += ';';
 
         try {
             stmt = this.con.createStatement();
             result = stmt.executeQuery(sql);
-            int driver_num = -1;
+            result.next();
+            int driver_num = result.getInt(1);
 
-            if (!result.isBeforeFirst()){
+            if (driver_num == 0) {
                 System.out.println("No record found. Please adjust the criteria.");
             }
             else {
-                driver_num = result.getInt(1);
                 System.out.println("Your request is placed. " + Integer.toString(driver_num) + " drivers are able to take the request.");
             }
 
@@ -124,27 +126,35 @@ public class Passenger implements User{
     public void check_a_trip(){
         // read input
         Scanner input = new Scanner(System.in);   
-        int pid;
+        String pid = new String();
         String start_date = new String();
         String end_date = new String();
         System.out.println("Please enter your ID.");
-        pid = input.nextInt();
+        pid = input.nextLine();
         System.out.println("Please enter the start date.");
         start_date = input.nextLine();
         System.out.println("Please enter the end date.");
         end_date = input.nextLine();
 
         // execute query
-        Statement stmt = null;
+        PreparedStatement pstmt = null;
         ResultSet result = null;
-        String sql = "SELECT * FROM trip T WHERE T.passenger_id = 'pid' AND T.start = 'start_date' AND T.end = 'end_date';";
+
+        String sql = "SELECT T.id, D.name, V.id, V.model, T.start, T.end, T.fee, T.rating " +
+                     "FROM trip T, vehicle V, driver D WHERE T.driver_id = D.id AND D.vehicle_id = V.id " +
+                     "AND T.passenger_id = ? AND T.start = ? AND T.end = ?;";
 
         try {
-            System.out.println("Number of Records in each table:");
-            result = this.con.createStatement().executeQuery(sql);
-            ResultSetMetaData data = result.getMetaData();
+            pstmt = con.prepareStatement(sql);
+            pstmt.setInt(1, Integer.parseInt(pid));
+            pstmt.setTimestamp(2, StrToDate(start_date));
+            pstmt.setTimestamp(3, StrToDate(end_date));
+            result = pstmt.executeQuery();
+            ResultSetMetaData rsmd = result.getMetaData();
+            System.out.println("Trip ID, Driver Name, Vehicle ID, Vehicle model, Start, End, Fee, Rating");
+
             while (result.next()){
-                for (int j=0; j<data.getColumnCount();j++){
+                for (int j=1; j<=rsmd.getColumnCount();j++){
                     if (j>1){
                         System.out.print(", ");
                     }
@@ -164,12 +174,12 @@ public class Passenger implements User{
                 }
                 result = null;
             }
-            if (stmt != null) {
+            if (pstmt != null) {
                 try {
-                    stmt.close();
+                    pstmt.close();
                 } catch (SQLException sqlEx) {
                 }
-                stmt = null;
+                pstmt = null;
             }
         }
     }
@@ -179,4 +189,23 @@ public class Passenger implements User{
         ;
     }
 
+    private java.sql.Timestamp StrToDate(String input) {
+        String[] ymd = input.split("-");
+        int year = Integer.parseInt(ymd[0]);
+        int month = Integer.parseInt(ymd[1]);
+        int day = Integer.parseInt(ymd[2]);
+
+        return new java.sql.Timestamp(year, month, day, 0, 0, 0, 0);
+    }
+
 }
+
+
+
+
+
+
+
+
+
+
