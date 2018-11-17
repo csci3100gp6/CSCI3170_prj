@@ -139,16 +139,19 @@ public class Passenger implements User{
         // execute query
         PreparedStatement pstmt = null;
         ResultSet result = null;
+        start_date += " 00:00:00";
+        end_date += " 00:00:00";
 
         String sql = "SELECT T.id, D.name, V.id, V.model, T.start, T.end, T.fee, T.rating " +
                      "FROM trip T, vehicle V, driver D WHERE T.driver_id = D.id AND D.vehicle_id = V.id " +
-                     "AND T.passenger_id = ? AND T.start = ? AND T.end = ?;";
+                     "AND T.passenger_id = ? AND T.start >= ? AND T.end <= ? " +
+                     "ORDER BY T.start DESC;";
 
         try {
             pstmt = con.prepareStatement(sql);
             pstmt.setInt(1, Integer.parseInt(pid));
-            pstmt.setTimestamp(2, StrToDate(start_date));
-            pstmt.setTimestamp(3, StrToDate(end_date));
+            pstmt.setTimestamp(2, Timestamp.valueOf(start_date));
+            pstmt.setTimestamp(3, Timestamp.valueOf(end_date));
             result = pstmt.executeQuery();
             ResultSetMetaData rsmd = result.getMetaData();
             System.out.println("Trip ID, Driver Name, Vehicle ID, Vehicle model, Start, End, Fee, Rating");
@@ -187,15 +190,6 @@ public class Passenger implements User{
     // rate a trip
     public void rate_a_trip(){
         ;
-    }
-
-    private java.sql.Timestamp StrToDate(String input) {
-        String[] ymd = input.split("-");
-        int year = Integer.parseInt(ymd[0]);
-        int month = Integer.parseInt(ymd[1]);
-        int day = Integer.parseInt(ymd[2]);
-
-        return new java.sql.Timestamp(year, month, day, 0, 0, 0, 0);
     }
 
 }
