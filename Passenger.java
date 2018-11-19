@@ -51,18 +51,21 @@ public class Passenger implements User{
     // request a ride
     public void request_a_ride(){
         Scanner input = new Scanner(System.in);
-        int pid;
+        String pid;
         String no_of_passenger = new String();
         String model_year = new String();
         String model_name = new String();
         String sql = new String("SELECT COUNT(*) FROM vehicle V, driver D WHERE V.id = D.vehicle_id AND V.seats >= %s");
+        String sql_col = new String("(passenger_id, passengers, taken");
+        String sql_value = new String("(%s, %s, FALSE");
         
         System.out.println("Please enter your passenger ID.");
-        pid = Integer.parseInt(input.nextLine());
+        pid = input.nextLine();
 
         System.out.println("Please enter the number of passengers.");
         no_of_passenger = input.nextLine();
         sql = String.format(sql, no_of_passenger);
+        sql_value = String.format(sql_value, pid, no_of_passenger);
 
         System.out.println("Please enter the earlist model year. (Press enter to skip)");
         model_year = input.nextLine();
@@ -73,18 +76,29 @@ public class Passenger implements User{
         // Users enter model name
         if (!model_name.equals("")){
             String cond = " AND V.model LIKE '%" + model_name + "%'";
+            String col = ", model";
+            String value = ", '" + model_name + "'";
             sql += cond;
+            sql_col += col;
+            sql_value += value;
         }
 
         // User enter model year 
         if (!model_year.equals("")) {
             String cond = String.format(" AND V.model_year >= %s", model_year);
+            String col = ", model_year";
+            String value = ", " + model_year;
             sql += cond;
+            sql_col += col;
+            sql_value += value;
         }
 
+        sql += ';';
+        sql_col += ")";
+        sql_value += ")";
         Statement stmt = null;
         ResultSet result = null;
-        sql += ';';
+        String sql_request = new String("INSERT INTO request " + sql_col + " VALUES " + sql_value + ";");
 
         try {
             stmt = this.con.createStatement();
@@ -97,6 +111,10 @@ public class Passenger implements User{
             }
             else {
                 System.out.println("Your request is placed. " + Integer.toString(driver_num) + " drivers are able to take the request.");
+                Statement stmt_insert = this.con.createStatement();
+                // System.out.println(sql_request);
+                int count = stmt_insert.executeUpdate(sql_request);
+                stmt_insert.close();
             }
 
             result.close();
