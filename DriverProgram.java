@@ -118,17 +118,17 @@ public class DriverProgram{
                     switch (choice) {
                         // request a ride
                         case 1:
-                            System.out.println("request a ride");
+                            // System.out.println("request a ride");
                             u2.request_a_ride();
                             break;
                         // check a trip
                         case 2:
-                            System.out.println("check a trip");
+                            // System.out.println("check a trip");
                             u2.check_a_trip();
                             break;
                         // rate a trip
                         case 3:
-                            System.out.println("rate a trip");
+                            // System.out.println("rate a trip");
                             u2.rate_a_trip();
                             break;
                         case 4:
@@ -160,19 +160,19 @@ public class DriverProgram{
                     switch (choice) {
                     // take a request
                     case 1:
-                        System.out.println("take a request");
-                        // u3.take_a_request();
+                        // System.out.println("take a request");
+                        u3.take_a_request();
                         break;
                     // finish a trip
                     case 2:
-                        System.out.println("finish a trip");
-                        // u3.finish_a_trip();
+                        // System.out.println("finish a trip");
+                        u3.finish_a_trip();
                         break;
                
                     // check driver rating
                     case 3:
-                        System.out.println("check driver rating");
-                        // u3.check_driver_rating();
+                        // System.out.println("check driver rating");
+                        u3.check_driver_rating();
                         break;
                     case 4:
                         u3.close_connection();

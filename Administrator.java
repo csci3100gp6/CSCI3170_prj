@@ -84,13 +84,7 @@ public class Administrator implements User{
         } catch (SQLException e) {
             System.out.println(e);
         } finally {
-            if (p != null) {
-                try {
-                    p.close();
-                } catch (SQLException sqlEx) {
-                }
-                p = null;
-            }
+        
             if (p != null) {
                 try {
                     p.close();
@@ -146,7 +140,7 @@ public class Administrator implements User{
         , "CREATE TABLE vehicle (id varchar(6) NOT NULL PRIMARY KEY, model varchar(30), model_year SMALLINT, seats int);"
         , "CREATE TABLE passenger (id int NOT NULL PRIMARY KEY, name varchar(30));"
         , "CREATE TABLE request (id int NOT NULL AUTO_INCREMENT, passenger_id int, model_year varchar(255), model varchar(255), passengers varchar(255), taken BOOL NOT NULL, PRIMARY KEY(id));"
-        , "CREATE TABLE trip(id int NOT NULL PRIMARY KEY, driver_id int, passenger_id int, start DATETIME, end DATETIME, fee int, rating int);"};
+        , "CREATE TABLE trip(id int NOT NULL AUTO_INCREMENT, driver_id int, passenger_id int, start DATETIME DEFAULT CURRENT_TIMESTAMP, end DATETIME DEFAULT NULL, fee int DEFAULT NULL, rating int DEFAULT NULL, PRIMARY KEY(id));"};
 
         try{
             for (int i = 0; i<5; i++){
@@ -221,7 +215,6 @@ public class Administrator implements User{
         String filelocation = new String();
 
         String temp = new String();
-        List <String[]> templist =new ArrayList<String[]>();
 
         // ask user for the input path
         System.out.println("Please enter the folder path.");
@@ -239,6 +232,7 @@ public class Administrator implements User{
                     System.out.println(temp);
                     insert_into_db(temp, file[i]);
                 }
+                inputfile.close();
             }
             catch (FileNotFoundException e){
                 System.out.println("file not found");
@@ -252,6 +246,7 @@ public class Administrator implements User{
 
     // check
     public void check(){
+        // System.out.println(this.con);
         Statement stmt = null;
         ResultSet result = null;
         String[] sql = {"SELECT COUNT(*) FROM driver;"
