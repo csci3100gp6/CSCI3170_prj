@@ -1,0 +1,10 @@
+Select R.id, P.name, R.passengers FROM 
+request R, driver D, vehicle V, passenger P
+ WHERE R.passenger_id = P.id 
+ AND D.vehicle_id = V.id 
+ AND V.seats>=R.passengers 
+ AND (V.model_year>=R.model_year OR R.model_year IS NULL) 
+ AND (V.model like CONCAT('%', R.model, '%') OR R.model IS NULL) 
+ AND D.id = 1 
+ AND D.id NOT IN (SELECT T2.driver_id from trip T2 
+ where T2.end IS NULL);

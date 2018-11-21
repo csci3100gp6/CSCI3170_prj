@@ -140,7 +140,7 @@ public class Administrator implements User{
         , "CREATE TABLE vehicle (id varchar(6) NOT NULL PRIMARY KEY, model varchar(30), model_year SMALLINT, seats int);"
         , "CREATE TABLE passenger (id int NOT NULL PRIMARY KEY, name varchar(30));"
         , "CREATE TABLE request (id int NOT NULL AUTO_INCREMENT, passenger_id int, model_year varchar(255), model varchar(255), passengers varchar(255), taken BOOL NOT NULL, PRIMARY KEY(id));"
-        , "CREATE TABLE trip(id int NOT NULL AUTO_INCREMENT, driver_id int, passenger_id int, start DATETIME DEFAULT CURRENT_TIMESTAMP, end DATETIME DEFAULT NULL, fee int DEFAULT NULL, rating int DEFAULT NULL, PRIMARY KEY(id));"};
+        , "CREATE TABLE trip(id int NOT NULL AUTO_INCREMENT, driver_id int, passenger_id int, start DATETIME DEFAULT NULL, end DATETIME DEFAULT NULL, fee int DEFAULT NULL, rating int DEFAULT NULL, PRIMARY KEY(id));"};
 
         try{
             for (int i = 0; i<5; i++){
@@ -240,7 +240,7 @@ public class Administrator implements User{
 
 
         }
-
+        input.close();
 
     }
 

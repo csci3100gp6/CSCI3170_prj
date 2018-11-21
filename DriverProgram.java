@@ -96,6 +96,7 @@ public class DriverProgram{
                             break;
                     }
                 } while (choice != 5);
+                u1.close_connection();
                 break;
 
             // This user is a passenger
@@ -142,6 +143,7 @@ public class DriverProgram{
                             break;
                     }
                 } while (choice != 4);
+                u2.close_connection();
                 break;
             case 3:
                 Driver u3 = new Driver();
@@ -185,6 +187,7 @@ public class DriverProgram{
                         break;
                     }
                 } while (choice != 4);
+                u3.close_connection();
                 break;
             case 4:
                 break;
