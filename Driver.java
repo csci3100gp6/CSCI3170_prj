@@ -59,114 +59,124 @@ public class Driver implements User{
         System.out.println("Please enter your ID.");
         driver_id = input.nextInt();
 
-        String sql = "SELECT R.id, P.name, R.passengers " 
-        + "FROM request R, driver D, vehicle V, passenger P " 
-        + "WHERE P.id = R.passenger_id " 
-        + "AND D.vehicle_id = V.id "
-        + "AND V.seats>=R.passengers "
-        + "AND (V.model_year>=R.model_year OR R.model_year IS NULL) "
-        + "AND (V.model like CONCAT('%', R.model, '%') OR R.model IS NULL) "
-        + "AND R.taken = 0 "
-        + "AND D.id = ? "
-        + "AND D.id NOT IN (SELECT T2.driver_id from trip T2 where T2.end IS NULL);";
+        String sql = "SELECT COUNT(*) " + "FROM request R, driver D, vehicle V, passenger P "
+                + "WHERE P.id = R.passenger_id " + "AND D.vehicle_id = V.id " + "AND V.seats>=R.passengers "
+                + "AND (V.model_year>=R.model_year OR R.model_year IS NULL) "
+                + "AND (V.model like CONCAT('%', R.model, '%') OR R.model IS NULL) " + "AND R.taken = 0 "
+                + "AND D.id = ? " + "AND D.id NOT IN (SELECT T2.driver_id from trip T2 where T2.end IS NULL);";
 
         
-        System.out.println("a");
         
         try {
-            System.out.println("b");
+            int no_of_columns = 0;
             p = this.con.prepareStatement(sql);
             p.setInt(1, driver_id);
             result = p.executeQuery();
-            System.out.println("c");
+            while(result.next()){
+                no_of_columns =result.getInt(1);
+            }
+            sql = "SELECT R.id, P.name, R.passengers " 
+            + "FROM request R, driver D, vehicle V, passenger P " 
+            + "WHERE P.id = R.passenger_id " 
+            + "AND D.vehicle_id = V.id "
+            + "AND V.seats>=R.passengers "
+            + "AND (V.model_year>=R.model_year OR R.model_year IS NULL) "
+            + "AND (V.model like CONCAT('%', R.model, '%') OR R.model IS NULL) "
+            + "AND R.taken = 0 "
+            + "AND D.id = ? "
+            + "AND D.id NOT IN (SELECT T2.driver_id from trip T2 where T2.end IS NULL);";
+            p = this.con.prepareStatement(sql);
+            p.setInt(1, driver_id);
+            result = p.executeQuery();
             
             ResultSetMetaData data = result.getMetaData();
-            int no_of_columns = data.getColumnCount();
             int[] valid_request_id = new int[no_of_columns];
             // pointer to the valid request array
             int pointer_valid_request = 0;
-            System.out.println("Request ID, Passenger name, Passengers");
-            while (result.next()) {
-                int temp;
-                for (int i = 0; i<no_of_columns;i++){
+            System.out.println(no_of_columns);
+            if (no_of_columns>0){
+                while (result.next()) {
+                    System.out.println("Request ID, Passenger name, Passengers");
                     
-                    if (i == 0){
-                        temp = result.getInt(i + 1);
-                        valid_request_id[pointer_valid_request] = temp;
-                        pointer_valid_request ++;
-                        System.out.print(temp);
+                    int temp;
+                    for (int i = 0; i<3;i++){
+                        if (i == 0){
+                            temp = result.getInt(i + 1);
+                            valid_request_id[pointer_valid_request] = temp;
+                            pointer_valid_request ++;
+                            System.out.print(temp);
+                        }
+                        else if (i==1){
+                            System.out.print(", " + result.getString(i+1));                        
+                        }
+                        else{
+                            System.out.print(", " + result.getInt(i+1));
+                        }
                     }
-                    else if (i==1){
-                        System.out.print(", " + result.getString(i+1));                        
+                    System.out.println();
+                }
+            
+                result.close();
+          
+                boolean valid = false;
+                do {
+                    System.out.println("Please enter the request ID.");
+                    request_id = input.nextInt();
+                    for (int i=0; i< no_of_columns; i++){
+                        if (request_id == valid_request_id[i]){
+                            valid = true;
+                        }
+                    }
+                    if (valid){
+                        sql = "Update request R SET R.taken = TRUE WHERE R.id = ?";
+                        try{
+                            p = this.con.prepareStatement(sql);
+                            p.setInt(1, request_id);
+                            p.executeUpdate();
+                        }
+                        catch(SQLException e){
+                            ;
+                        }
+                        try {
+                            p = this.con.prepareStatement("INSERT INTO trip (driver_id, passenger_id, start) values (?, ?, ?);");
+                            p.setInt(1, driver_id);
+                            p.setInt(2, request_id);
+                            p.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+                            p.executeUpdate();
+                        }
+                        catch (SQLException e){
+                            System.out.println(e);
+                        }
+
+                        try{
+                            pointer_valid_request =0;
+                            sql = "SELECT T.id, P.name, T.start FROM passenger P, trip T WHERE P.id = T.passenger_id AND T.driver_id = ? AND T.end IS NULL;";
+                            p = this.con.prepareStatement(sql);
+                            p.setInt(1, driver_id);
+                            result = p.executeQuery();
+                            while(result.next()){
+                                System.out.println(result.getInt(1)+", " +result.getString(2) + ", " + result.getTimestamp(3));
+                            }
+                
+                        }
+                        catch(SQLException e){
+                            System.out.println(e);
+                        }
                     }
                     else{
-                        System.out.print(", " + result.getInt(i+1));
-                    }
-                }
-                System.out.println();
-            }
-            result.close();
-            for (int i =0; i<no_of_columns;i++ ){
-                System.out.print(valid_request_id[i] + ",");
-            }
-            System.out.println();
-            boolean valid = false;
-            do {
-                System.out.println("Please enter the request ID.");
-                request_id = input.nextInt();
-                for (int i=0; i< no_of_columns; i++){
-                    if (request_id == valid_request_id[i]){
+                        System.out.println("Invalid ID.");
                         valid = true;
                     }
-                }
-                if (valid){
-                    sql = "Update request R SET R.taken = TRUE WHERE R.id = ?";
-                    try{
-                        p = this.con.prepareStatement(sql);
-                        p.setInt(1, request_id);
-                        p.executeUpdate();
-                    }
-                    catch(SQLException e){
-                        ;
-                    }
-                    try {
-                        p = this.con.prepareStatement("INSERT INTO trip (driver_id, passenger_id, start) values (?, ?, ?);");
-                        p.setInt(1, driver_id);
-                        p.setInt(2, request_id);
-                        p.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-                        p.executeUpdate();
-                    }
-                    catch (SQLException e){
-                        System.out.println(e);
-                    }
-
-                    try{
-                        pointer_valid_request =0;
-                        sql = "SELECT T.id, P.name, T.start FROM passenger P, trip T WHERE P.id = T.passenger_id AND T.driver_id = ? AND T.end IS NULL;";
-                        p = this.con.prepareStatement(sql);
-                        p.setInt(1, driver_id);
-                        result = p.executeQuery();
-                        while(result.next()){
-                            System.out.println(result.getInt(1)+", " +result.getString(2) + ", " + result.getTimestamp(3));
-                        }
-                
-                    }
-                    catch(SQLException e){
-                        System.out.println(e);
-                    }
-                }
-                else{
-                    System.out.println("Invalid ID. Please enter again.");
-                }
        
-            } while(!valid); 
+                } while(!valid);
+            }
+            else{
+                System.out.println("No eligible request.");
+            } 
         }
         catch (SQLException e){
-            
             System.out.println(e);
         }
-        System.out.println("no bug");
-        input.close();        
 
     }
 
@@ -222,11 +232,13 @@ public class Driver implements User{
             else{
                 System.out.println("You do not have an unfinished trip!");
             }
+            
         }
         catch (SQLException e){
+            
             System.out.println(e);
         }
-        input.close();
+        
     }
 
     // check driver rating
@@ -238,7 +250,7 @@ public class Driver implements User{
         driver_id = input.nextInt();
         ResultSet result = null;
         PreparedStatement p = null;
-        String sql = "SELECT COUNT(*) FROM trip WHERE driver_id = ?";
+        String sql = "SELECT COUNT(*) FROM trip T WHERE T.driver_id = ? AND T.rating <> 0";
         try{
             p = this.con.prepareStatement(sql);
             p.setInt(1, driver_id);
@@ -251,18 +263,20 @@ public class Driver implements User{
 
             if (has_five_rating){
 
-                sql = "SELECT T.rating FROM trip T ORDERED BY start;";
+                sql = "SELECT T.rating FROM trip T WHERE T.driver_id = ? AND T.rating <> 0 ORDER BY T.start DESC;";
                 int total = 0;
-                p =this.con.createStatement().execute(sql);
+                p = this.con.prepareStatement(sql);
+                p.setInt(1, driver_id);
                 result = p.executeQuery();
                 int[] average = new int[5];
                 for (int i=0; i<5;i++){
                     result.next();
                     total += result.getInt(1);
+                    System.out.println(total);
 
                 }
            
-                System.out.println("Your driver rating is "+ total/5 +".");
+                System.out.println("Your driver rating is "+(float)total/5 +".");
             }
             else{
                 System.out.println("Your rating is not yet determined.");

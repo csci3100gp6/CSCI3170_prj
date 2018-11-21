@@ -240,7 +240,6 @@ public class Administrator implements User{
 
 
         }
-        input.close();
 
     }
 

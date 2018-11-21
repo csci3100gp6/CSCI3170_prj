@@ -162,18 +162,15 @@ public class DriverProgram{
                     switch (choice) {
                     // take a request
                     case 1:
-                        // System.out.println("take a request");
                         u3.take_a_request();
                         break;
                     // finish a trip
                     case 2:
-                        // System.out.println("finish a trip");
                         u3.finish_a_trip();
                         break;
                
                     // check driver rating
                     case 3:
-                        // System.out.println("check driver rating");
                         u3.check_driver_rating();
                         break;
                     case 4:
