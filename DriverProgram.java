@@ -11,7 +11,8 @@ public class DriverProgram{
         System.out.println("4. None of the above");
         System.out.println("Please enter [1-4].");
     }
-    public static void main(String[] args){
+
+    public static void menu(){
         Scanner input = new Scanner(System.in);        
         boolean valid_input = true;
         int user_type = -1;
@@ -42,7 +43,10 @@ public class DriverProgram{
         int choice = -1;
         valid_input = true;
 
-        // create a new user according to the type
+        SelectUser(user_type, valid_input, choice, input);
+    }
+
+    public static void SelectUser(int user_type, boolean valid_input, int choice, Scanner input){
         switch(user_type){
             // administrator
             case 1: 
@@ -86,7 +90,8 @@ public class DriverProgram{
                             break;
                         // Go back
                         case 5:
-                            u1.close_connection();
+                            // u1.close_connection();
+                            menu();
                             break;
                         // invalid input
                         default:
@@ -133,7 +138,8 @@ public class DriverProgram{
                             u2.rate_a_trip();
                             break;
                         case 4:
-                            u2.close_connection();
+                            // u2.close_connection();
+                            menu();
                             break;
                         // invalid input
                         default:
@@ -174,7 +180,8 @@ public class DriverProgram{
                         u3.check_driver_rating();
                         break;
                     case 4:
-                        u3.close_connection();
+                        // u3.close_connection();
+                        menu();
                         break;
                     // invalid input
                     default:
@@ -189,9 +196,10 @@ public class DriverProgram{
             case 4:
                 break;
         }
-
         // Avoid memory leak
         input.close();
-        
+    }
+    public static void main(String[] args){
+        menu();
     }
 }
