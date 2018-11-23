@@ -54,7 +54,6 @@ public class DriverProgram{
                 u1.connect_to_db();
                 do {
                     
-                    System.out.println(valid_input);
                     if (valid_input == true){
                         u1.print_statements();
                     }
