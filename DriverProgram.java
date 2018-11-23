@@ -90,7 +90,7 @@ public class DriverProgram{
                             break;
                         // Go back
                         case 5:
-                            // u1.close_connection();
+                            u1.close_connection();
                             menu();
                             break;
                         // invalid input
@@ -138,7 +138,7 @@ public class DriverProgram{
                             u2.rate_a_trip();
                             break;
                         case 4:
-                            // u2.close_connection();
+                            u2.close_connection();
                             menu();
                             break;
                         // invalid input
@@ -180,7 +180,7 @@ public class DriverProgram{
                         u3.check_driver_rating();
                         break;
                     case 4:
-                        // u3.close_connection();
+                        u3.close_connection();
                         menu();
                         break;
                     // invalid input
