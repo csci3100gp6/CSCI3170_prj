@@ -108,7 +108,7 @@ public class Administrator implements User{
         catch(SQLException e){
             System.out.println(e);
         }
-        System.out.println("Connected successfully");
+        // System.out.println("Connected successfully");
     }
     
     // Disconnect the DB

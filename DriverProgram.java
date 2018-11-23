@@ -70,22 +70,22 @@ public class DriverProgram{
                     switch(choice){
                         // create table
                         case 1:
-                            System.out.println("create");
+                            // System.out.println("create");
                             u1.create();
                             break;
                         // Delete table
                         case 2:
-                            System.out.println("delete");
+                            // System.out.println("delete");
                             u1.delete();
                             break;
                         // Load data
                         case 3:
-                            System.out.println("loaded");
+                            // System.out.println("loaded");
                             u1.load();
                             break;
                         // Check data
                         case 4:
-                            System.out.println("check");
+                            // System.out.println("check");
                             u1.check();
                             break;
                         // Go back
