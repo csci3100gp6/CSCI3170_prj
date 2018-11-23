@@ -58,9 +58,11 @@ public class Passenger implements User{
         String sql = new String("SELECT COUNT(*) FROM vehicle V, driver D WHERE V.id = D.vehicle_id AND V.seats >= %s");
         String sql_col = new String("(passenger_id, passengers, taken");
         String sql_value = new String("(%s, %s, FALSE");
+        String sql_error = new String("SELECT COUNT(*) FROM passenger P WHERE P.id = %s;");
         
         System.out.println("Please enter your passenger ID.");
         pid = input.nextLine();
+        sql_error = String.format(sql_error, pid);
 
         System.out.println("Please enter the number of passengers.");
         no_of_passenger = input.nextLine();
@@ -98,26 +100,43 @@ public class Passenger implements User{
         sql_value += ")";
         Statement stmt = null;
         ResultSet result = null;
+        Statement stmt_err = null;
+        ResultSet result_err = null;
+        Statement stmt_insert = null;
         String sql_request = new String("INSERT INTO request " + sql_col + " VALUES " + sql_value + ";");
 
-        try {
-            stmt = this.con.createStatement();
-            result = stmt.executeQuery(sql);
-            result.next();
-            int driver_num = result.getInt(1);
+        try {   
+            stmt_err = this.con.createStatement();
+            result_err = stmt_err.executeQuery(sql_error);
+            result_err.next();
+            int valid_count = result_err.getInt(1);
 
-            if (driver_num == 0) {
-                System.out.println("No record found. Please adjust the criteria.");
+            if (valid_count <= 0) {
+                System.out.println("[ERROR] Passenger not found.");
             }
             else {
-                System.out.println("Your request is placed. " + Integer.toString(driver_num) + " drivers are able to take the request.");
-                Statement stmt_insert = this.con.createStatement();
-                // System.out.println(sql_request);
-                int count = stmt_insert.executeUpdate(sql_request);
-                stmt_insert.close();
+                stmt = this.con.createStatement();
+                result = stmt.executeQuery(sql);
+                result.next();
+                int driver_num = result.getInt(1);
+
+                if (driver_num == 0) {
+                    System.out.println("No record found. Please adjust the criteria.");
+                }
+                else {
+                    System.out.println("Your request is placed. " + Integer.toString(driver_num) + " drivers are able to take the request.");
+                    stmt_insert = this.con.createStatement();
+                    // System.out.println(sql_request);
+                    int count = stmt_insert.executeUpdate(sql_request);
+                    stmt_insert.close();
+                }
+
+                stmt.close();
+                result.close();
             }
 
-            result.close();
+            result_err.close();
+            stmt_err.close();
         } 
         catch (SQLException e) {
             System.out.println(e);
@@ -157,8 +176,13 @@ public class Passenger implements User{
         // execute query
         PreparedStatement pstmt = null;
         ResultSet result = null;
+        Statement stmt_err = null;
+        ResultSet result_err = null;
         start_date += " 00:00:00";
         end_date += " 00:00:00";
+
+        String sql_error = new String("SELECT COUNT(*) FROM passenger P WHERE P.id = %s;");
+        sql_error = String.format(sql_error, pid);
 
         String sql = "SELECT T.id, D.name, V.id, V.model, T.start, T.end, T.fee, T.rating " +
                      "FROM trip T, vehicle V, driver D WHERE T.driver_id = D.id AND D.vehicle_id = V.id " +
@@ -166,25 +190,45 @@ public class Passenger implements User{
                      "ORDER BY T.start DESC;";
 
         try {
-            pstmt = this.con.prepareStatement(sql);
-            pstmt.setInt(1, Integer.parseInt(pid));
-            pstmt.setTimestamp(2, Timestamp.valueOf(start_date));
-            pstmt.setTimestamp(3, Timestamp.valueOf(end_date));
-            result = pstmt.executeQuery();
-            ResultSetMetaData rsmd = result.getMetaData();
-            System.out.println("Trip ID, Driver Name, Vehicle ID, Vehicle model, Start, End, Fee, Rating");
+            stmt_err = this.con.createStatement();
+            result_err = stmt_err.executeQuery(sql_error);
+            result_err.next();
+            int valid_count = result_err.getInt(1);
 
-            while (result.next()){
-                for (int j=1; j<=rsmd.getColumnCount();j++){
-                    if (j>1){
-                        System.out.print(", ");
-                    }
-                    System.out.print(result.getString(j));
-                }
-                System.out.println();
+            if (valid_count <= 0) {
+                System.out.println("[ERROR] Passenger not found.");
             }
-            result.close();
-            
+            else {
+                pstmt = this.con.prepareStatement(sql);
+                pstmt.setInt(1, Integer.parseInt(pid));
+                pstmt.setTimestamp(2, Timestamp.valueOf(start_date));
+                pstmt.setTimestamp(3, Timestamp.valueOf(end_date));
+                result = pstmt.executeQuery();
+                ResultSetMetaData rsmd = result.getMetaData();
+
+                if (result.isBeforeFirst()) {
+
+                    System.out.println("Trip ID, Driver Name, Vehicle ID, Vehicle model, Start, End, Fee, Rating");
+
+                    while (result.next()){
+                        for (int j=1; j<=rsmd.getColumnCount();j++){
+                            if (j>1){
+                                System.out.print(", ");
+                            }
+                            System.out.print(result.getString(j));
+                        }
+                        System.out.println();
+                    }
+                }
+                else {
+                    System.out.println("No matched trip is found.");
+                }
+
+                pstmt.close();
+                result.close();
+            }
+            stmt_err.close();
+            result_err.close();
         } catch (SQLException e) {
             System.out.println(e);
         } finally {
@@ -220,6 +264,9 @@ public class Passenger implements User{
 
         System.out.println("Please enter the rating.");
         rating = input.nextLine();
+
+        String sql_error = new String("SELECT COUNT(*) FROM passenger P WHERE P.id = %s;");
+        sql_error = String.format(sql_error, pid);
         
         if (Integer.parseInt(rating) > 5 || Integer.parseInt(rating) < 1) {
             System.out.println("The value of rating should be between 1 and 5.");
@@ -236,15 +283,30 @@ public class Passenger implements User{
 
         PreparedStatement pstmt_retrieve = null;
         PreparedStatement pstmt_update = null;
+        Statement stmt_err = null;
+        ResultSet result_err = null;
         int updateCount = -1;
         ResultSet result = null;
 
         try {
-            pstmt_update = this.con.prepareStatement(sql_update);
-            pstmt_update.setInt(1, Integer.parseInt(rating));
-            pstmt_update.setInt(2, Integer.parseInt(pid));
-            pstmt_update.setInt(3, Integer.parseInt(tid));
-            updateCount = pstmt_update.executeUpdate();
+            stmt_err = this.con.createStatement();
+            result_err = stmt_err.executeQuery(sql_error);
+            result_err.next();
+            int valid_count = result_err.getInt(1);
+
+            if (valid_count <= 0) {
+                System.out.println("[ERROR] Passenger not found.");
+            }
+            else {
+                pstmt_update = this.con.prepareStatement(sql_update);
+                pstmt_update.setInt(1, Integer.parseInt(rating));
+                pstmt_update.setInt(2, Integer.parseInt(pid));
+                pstmt_update.setInt(3, Integer.parseInt(tid));
+                updateCount = pstmt_update.executeUpdate();
+                pstmt_update.close();
+            }
+            stmt_err.close();
+            result_err.close();
         }
         catch(SQLException e){
             System.out.println(e);
@@ -263,25 +325,30 @@ public class Passenger implements User{
         }
 
         try {
-            pstmt_retrieve = this.con.prepareStatement(sql_retrieve);
-            pstmt_retrieve.setInt(1, Integer.parseInt(pid));
-            pstmt_retrieve.setInt(2, Integer.parseInt(tid));
-            result = pstmt_retrieve.executeQuery();
+            if (updateCount > 0) {
+                pstmt_retrieve = this.con.prepareStatement(sql_retrieve);
+                pstmt_retrieve.setInt(1, Integer.parseInt(pid));
+                pstmt_retrieve.setInt(2, Integer.parseInt(tid));
+                result = pstmt_retrieve.executeQuery();
 
-            ResultSetMetaData rsmd = result.getMetaData();
-            System.out.println("Trip ID, Driver Name, Vehicle ID, Vehicle model, Start, End, Fee, Rating");
+                ResultSetMetaData rsmd = result.getMetaData();
+                System.out.println("Trip ID, Driver Name, Vehicle ID, Vehicle model, Start, End, Fee, Rating");
 
-            while (result.next()){
-                for (int j=1; j<=rsmd.getColumnCount();j++){
-                    if (j>1){
-                        System.out.print(", ");
+                while (result.next()){
+                    for (int j=1; j<=rsmd.getColumnCount();j++){
+                        if (j>1){
+                            System.out.print(", ");
+                        }
+                        System.out.print(result.getString(j));
                     }
-                    System.out.print(result.getString(j));
+                    System.out.println();
                 }
-                System.out.println();
+                pstmt_retrieve.close();
+                result.close();
             }
-            result.close();
-
+            else {
+                System.out.println("No matched trip is found.");
+            }
         }
         catch(SQLException e){
             System.out.println(e);
